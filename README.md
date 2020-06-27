@@ -18,7 +18,7 @@ As a matter of personal preference, REST is what you're hoping for :P
 ### HTTP client
 API requests are made via an HTTP client.
 
-```
+```groovy
 // instantiate an http client object for the target system
 httpClient = HTTP.open(hostname, port)
 ```
@@ -74,3 +74,61 @@ Let's open up a connection to the API server with an HTTP client:
 httpClient = HTTP.open(hostname, 443)
 ```
 
+Now we'll build our query URL using the components we spoke about above:
+
+```groovy
+url = "https://" + hostname + "/<INSERT-API-ENDPOINT>" + "?<INSERT-QUERY-PARAMETERS>" + "&<ONE-MORE-PARAMETER>"
+```
+
+Let's build some headers into a map as well.  Maps are data types that contain a number of key-value pairs.  They are incredibly powerful because you can use the key to "look-up" the value, which is exactly what we will do with our JSON output:
+
+```groovy
+headers                 = [:]
+headers['user']         = user
+headers['pass']         = pass
+headers['Content-Type'] = 'application/json'
+```
+
+Now let's send the query that we've built!
+
+```groovy
+getResponse = httpClient.get(url, headers)
+```
+
+Nice! Now we ask the httpClient for the response body it received from this query:
+
+```groovy
+body = httpClient.getResponseBody()
+```
+
+Cool!  So the API server will be returning JSON because we are assuming this API is a REST API (and also because we requested this content type in the headers).  Technically, the API server will be returning a JSON string (just a bunch of text), so we will need to use our JSON slurper to turn this string into a map (just like our headers!)
+
+```groovy
+response_json = new JsonSlurper().parseText(body)
+```
+
+Let's assume that we've made a query to **/device/devices/<SOME-DEVICE-ID>** and we are trying to extract the time when it was created.  Here is the [associated model in our documentation](https://www.logicmonitor.com/swagger-ui-master/dist/#/Devices/getDeviceById).  See if you can figure out the JSON path to get the created time from our response_json that we just built!
+
+```groovy
+created_on_epoch = response_json['createdOn']
+```
+
+I promise this stuff ain't rocket surgery, it's mostly copy-pasting stuff directly out of documentation.  The last thing we need to do is print out the datapoint value so LogicMonitor can record it:
+
+```groovy
+println("created_on_epoch=${created_on_epoch}")
+```
+
+The **${}** business is [Groovy string interpolation](https://groovy-lang.org/syntax.html#_string_interpolation) and is an amazing shortcut to building datapoints for printing.  For more information on how LogicMonitor expects your output to be formatted, see [our documentation](https://www.logicmonitor.com/support/logicmodules/datasources/data-collection-methods/scripted-data-collection-overview).  It's also worth reading how [active discovery](https://www.logicmonitor.com/support/logicmodules/datasources/active-discovery/script-active-discovery) is expected to be formatted.
+
+## Okay cool Ian how do I get started, how do I test my scripts, etc.
+
+Incoming personal preference: download [Visual Studio Code](https://code.visualstudio.com/) and never look back.  It has an excellent UI based extension system, and it is a good idea to download Alignment (because it lines up your code.  That's how I made the headers look the way they do) as well as code-groovy which is Groovy linting and formatting, code coloring, and more helpful tools!  Shoot it'll even debug your code for you or tell you if you've instantiated variables that you never called again.
+
+To test within LogicMonitor, I prefer using the [LogicMonitor Script Debug Helper](https://chrome.google.com/webstore/detail/logicmonitor-script-debug/ijojgoccfeggejpbhdahmeijjhpdjklf?authuser=1&_ga=2.34302374.602529484.1593289148-1947610191.1591034734) which is a helpful Chrome extension that allows you to copy paste your code in, supply a hostname to query, and away you go!
+
+After installing, this extension will activate when the **!groovy** command is called within the LogicMonitor Collector Debug Facility.  All of this is [documented on LogicMonitor's website](https://www.logicmonitor.com/support/terminology-syntax/scripting-support/script-troubleshooting)!
+
+## This is all well and good, but you forgot XYZ
+
+Let me know if there's anything else you'd like me to include and I'd be happy to oblige!
