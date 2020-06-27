@@ -9,7 +9,7 @@ API stands for *Application Programmatic Inteface*.  It's a way of requesting/cr
 What this often means is that it is far easier to make sense of API documentation if you have used the tool and understand how calls are being made in the back end.
 Here is an example within LogicMonitor of an API call occcuring behind the scenes:
 
-INSERT SCREENSHOT HERE
+[![LogicMonitor Device GET](/screenshots/Device_get.png)](https://github.com/ianbloom/REST-API-Groovy-Tutorial/blob/master/screenshots/Device_get.png)
 
 API calls are made via HTTP requests which are very structurally similar.  There are many different models i.e. REST vs. SOAP, that represent different types of data in requests and responses.
 As a matter of personal preference, REST is what you're hoping for :P
